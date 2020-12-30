@@ -12,6 +12,8 @@ namespace PromtTranslation.Domain.Models
         public string FrenchText { get; set; }
         public string ItalianText { get; set; }
         public string Danish { get; set; }
+        public int Status { get; set; }
+
 
 
     }
