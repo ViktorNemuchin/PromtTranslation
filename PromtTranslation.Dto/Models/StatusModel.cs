@@ -4,9 +4,8 @@ using System.Text;
 
 namespace PromtTranslation.Domain.Models
 {
-    public class RouteModel:BaseModel
+    public class StatusModel:BaseModel
     {
-        public string RouteName { get; set; }
-        public string Route { get; set; }
+        public string StatusValue { get; set; }
     }
 }
