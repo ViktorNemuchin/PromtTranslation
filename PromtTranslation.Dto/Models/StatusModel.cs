@@ -7,5 +7,6 @@ namespace PromtTranslation.Domain.Models
     public class StatusModel:BaseModel
     {
         public string StatusValue { get; set; }
+        public List<TranslationModel> Translations { get; set; }
     }
 }

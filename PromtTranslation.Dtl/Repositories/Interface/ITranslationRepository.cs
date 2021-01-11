@@ -8,6 +8,6 @@ namespace PromtTranslation.Dtl.Repositories.Interface
 {
     public interface ITranslationRepository: IBaseRepository<TranslationModel>
     {
-        Task<TranslationModel> GetTranlationByText(string text, string locale);
+        Task<TranslationTextModel> GetTranslationByText(string text, string locale);
     }
 }

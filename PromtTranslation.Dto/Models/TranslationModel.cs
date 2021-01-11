@@ -4,15 +4,15 @@ using System.Text;
 
 namespace PromtTranslation.Domain.Models
 {
-    public class TranslationModel:BaseModel
+    public class TranslationModel : BaseModel
     {
-        public string RussianText { get; set; }
-        public string EnglishText { get; set; }
-        public string FrenchText { get; set; }
-        public string ItalianText { get; set; }
-        public string Danish { get; set; }
-        public int Status { get; set; }
+        public Guid StatusId { get; set; }
+        public StatusModel Status  {get; set;}
         public Guid RouteModelId { get; set; }
         public RouteModel Route {get;set;}
+        public List<TranslationTextModel> Translations { get; set; }
+        public TranslationModel (List<TranslationTextModel>transaltions) =>
+            (Translations) = (transaltions);
+        public TranslationModel() { }
     }
 }
