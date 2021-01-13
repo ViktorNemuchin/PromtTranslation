@@ -17,8 +17,8 @@ namespace PromtTranslation.Services.Implementation
         private readonly HttpClient _httpclient;
         private readonly string _getLanguageUrl;
 
-        public TranslationService(ITranslatioonUnitOfWork translationUnitOfWork, HttpClient httpClient, string getLanguageUrl) =>
-            (_translatioonUnitOfWork, _httpclient, _getLanguageUrl) = (translationUnitOfWork, httpClient, getLanguageUrl);
+        public TranslationService(ITranslatioonUnitOfWork translationUnitOfWork, HttpClient httpClient) =>
+            (_translatioonUnitOfWork, _httpclient, _getLanguageUrl) = (translationUnitOfWork, httpClient, "");
              
         public async Task<ResponseTranslationEntityDto> TranslateText(RequestTranslationEntityDto requestTranslationEntity)
         {
