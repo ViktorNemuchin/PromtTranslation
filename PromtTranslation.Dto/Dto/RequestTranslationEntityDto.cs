@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using PromtTranslation.Domain.Enums;
+
 
 namespace PromtTranslation.Domain.Dto
 {
@@ -9,11 +9,16 @@ namespace PromtTranslation.Domain.Dto
     {
         private string _translationText { get; set; }
         private string _translationLocal { get; set; }
-        private TranslationRouteEnum _translationRoute { get; set; }
+        private string _translationRouteName { get; set; }
 
-        public RequestTranslationEntityDto(string translationText, string translationLocal)
-            => (_translationText, _translationLocal, _translationRoute) = (translationText, translationLocal, TranslationRouteEnum.DefualtRoute);
+        private Guid _statusId { get; set; }
 
+        public RequestTranslationEntityDto(string translationText, string translationLocal, Guid statusId)
+            => (_translationText, _translationLocal, _translationRouteName, _statusId) = (translationText, translationLocal, "default", statusId);
+        public RequestTranslationEntityDto(string translationText, string translationLocal, string translationRouteName, Guid statusId)
+            => (_translationText, _translationLocal, _translationRouteName, _statusId) = (translationText, translationLocal, translationRouteName, statusId);
+        public RequestTranslationEntityDto(string translationText, Guid statusId) =>
+            (_translationText, _statusId) = (translationText, statusId);
         public string TranslationText 
         {
             get => _translationText;
@@ -24,9 +29,13 @@ namespace PromtTranslation.Domain.Dto
             get => _translationLocal;
             set => _translationLocal = value;
         }
-        public TranslationRouteEnum TranslationRoute 
+        public string TranslationRouteName 
         {
-            get => _translationRoute;
+            get => _translationRouteName;
+        }
+        public Guid StatusId 
+        {
+            get => _statusId;
         }
     }
 }

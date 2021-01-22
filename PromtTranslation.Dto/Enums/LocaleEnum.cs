@@ -4,9 +4,12 @@ using System.Text;
 
 namespace PromtTranslation.Domain.Enums
 {
-    public enum TranslationRouteEnum
+    public enum LocaleEnum
     {
-        NoRoute,
-        DefualtRoute,
+        ru,
+        en,
+        it,
+        fr,
+        da
     }
 }

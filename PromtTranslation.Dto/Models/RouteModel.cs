@@ -4,9 +4,10 @@ using System.Text;
 
 namespace PromtTranslation.Domain.Models
 {
-    public class RouteModel
+    public class RouteModel : BaseModel
     {
-        public Guid RouteId { get; set; }
-        public string Route { get; set; }
+        public string RouteName { get; set; }
+        public List<LanguageRouteStepsModel> LanguageRouteSteps{ get; set; }
+        public List<TranslationModel> Translations {get; set;}
     }
 }

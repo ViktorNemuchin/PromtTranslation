@@ -15,17 +15,64 @@ namespace PromtTranslation.Dtl.Context
         
         public DbSet<RouteModel> Routes;
 
+        public DbSet<StatusModel> Statuses;
+
+        public DbSet<TranslationTextModel> TransaltionTexts;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder) 
         {
             modelBuilder
                 .Entity<TranslationModel>()
-                .Property(id => id.TranslationId)
+                .Property(ent => ent.Id)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder
+                .Entity<TranslationModel>()
+                .HasKey(ent => ent.Id);
+
+            modelBuilder
+               .Entity<TranslationModel>()
+               .HasMany(x => x.Translations);
+
+            modelBuilder
+                .Entity<RouteModel>()
+                .Property(ent => ent.Id)
                 .ValueGeneratedOnAdd();
 
             modelBuilder
                 .Entity<RouteModel>()
-                .Property(id => id)
+                .HasMany(x => x.Translations);
+
+            modelBuilder
+                .Entity<RouteModel>()
+                .HasKey(ent => ent.Id);
+            modelBuilder
+                .Entity<RouteModel>()
+                .HasMany(x => x.Translations);
+
+            modelBuilder
+                .Entity<StatusModel>()
+                .Property(ent => ent.Id)
                 .ValueGeneratedOnAdd();
+
+            modelBuilder
+                .Entity<StatusModel>()
+                .HasKey(ent => ent.Id);
+
+            modelBuilder
+                .Entity<StatusModel>()
+                .HasMany(x => x.Translations);
+
+
+            modelBuilder
+                .Entity<TranslationTextModel>()
+                .Property(ent => ent.Id)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder
+                .Entity<TranslationTextModel>()
+                .HasKey(ent => ent.Id);
+
         }
 
     }
