@@ -1,21 +1,23 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using PromtTranslation.Services.Interface;
+using Quartz;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using PromtTranslation.Services.Interface;
-using Quartz;
+
 
 namespace PromtTranslation.WorkerService
 {
-    public class PromtTranslationJob : IJob
+    public class SendTranslationJob : IJob
     {
-        private readonly ILogger<PromtTranslationJob> _logger;
+
+        private readonly ILogger<SendTranslationJob> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ITranslationService _translationService;
 
-        public PromtTranslationJob(ILogger<PromtTranslationJob> logger, IHttpClientFactory httpClientFactory, ITranslationService translationService) 
+        public SendTranslationJob(ILogger<SendTranslationJob> logger, IHttpClientFactory httpClientFactory, ITranslationService translationService)
         {
             _httpClientFactory = httpClientFactory;
             _translationService = translationService;

@@ -9,5 +9,6 @@ namespace PromtTranslation.Dtl.Repositories.Interface
     public interface ITranslationRepository: IBaseRepository<TranslationModel>
     {
         Task<TranslationTextModel> GetTranslationByText(string text, string locale);
+        Task<IEnumerable<TranslationModel>> GetTranslationEntriesForTranslation(Guid statusId);
     }
 }

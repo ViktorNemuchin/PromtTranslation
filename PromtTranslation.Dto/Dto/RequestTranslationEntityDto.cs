@@ -19,6 +19,9 @@ namespace PromtTranslation.Domain.Dto
             => (_translationText, _translationLocal, _translationRouteName, _statusId) = (translationText, translationLocal, translationRouteName, statusId);
         public RequestTranslationEntityDto(string translationText, Guid statusId) =>
             (_translationText, _statusId) = (translationText, statusId);
+        public RequestTranslationEntityDto(string translationText) =>
+            (_translationText) = (translationText);
+        public RequestTranslationEntityDto() { }
         public string TranslationText 
         {
             get => _translationText;

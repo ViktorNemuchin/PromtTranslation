@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PromtTranslation.Dtl.Context;
@@ -9,9 +10,10 @@ using PromtTranslation.Dtl.Context;
 namespace PromtTranslation.Api.Migrations
 {
     [DbContext(typeof(TranslationDbContext))]
-    partial class TranslationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210125153144_Add_seed_data")]
+    partial class Add_seed_data
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

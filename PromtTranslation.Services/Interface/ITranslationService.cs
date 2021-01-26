@@ -9,6 +9,8 @@ namespace PromtTranslation.Services.Interface
     public interface ITranslationService
     {
         Task<ResponseTranslationEntityDto> TranslateText(RequestTranslationEntityDto requestTranslationEntity);
+        Task TranslateAddedTranslationEntries();
+        Task SendTranslationEntries();
 
     }
 }

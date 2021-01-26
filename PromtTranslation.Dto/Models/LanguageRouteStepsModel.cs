@@ -6,7 +6,9 @@ namespace PromtTranslation.Domain.Models
 {
     public class LanguageRouteStepsModel:BaseModel
     {
-        public string Language { get; set; }
-        public string RouteSteps { get; set; }
+        public string LanguageFrom { get; set; }
+        public string LanguageTo { get; set; }
+        public RouteModel Route { get; set; }
+        public Guid RouteId { get; set; }
     }
 }

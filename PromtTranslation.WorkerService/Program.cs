@@ -14,6 +14,7 @@ using PromtTranslation.Dtl.Context;
 using PromtTranslation.Services.Implementation;
 using PromtTranslation.Services.Interface;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace PromtTranslation.WorkerService
 {
@@ -30,9 +31,10 @@ namespace PromtTranslation.WorkerService
                 {
                     services.AddHttpClient();
                     services.AddScoped<ITranslationService, TranslationService>();
+                    var conString = hostContext.Configuration.GetSection("ConnectionString").GetChildren();
                     services.AddDbContext<TranslationDbContext>(options =>
                     {
-                        options.UseNpgsql(hostContext.Configuration.GetSection("ConnectionString").GetSection("PromtDb").Value,
+                        options.UseNpgsql(hostContext.Configuration.GetConnectionString("PromtDb"),
                             npsqlOptions => npsqlOptions.MigrationsAssembly("PromtTranslation.Api"));
                         options.EnableSensitiveDataLogging();
                     });
@@ -43,6 +45,7 @@ namespace PromtTranslation.WorkerService
                         // Use a Scoped container to create jobs. I'll touch on this later
                         q.UseMicrosoftDependencyInjectionScopedJobFactory();
                         q.AddJobAndTrigger<PromtTranslationJob>(hostContext.Configuration);
+                        q.AddJobAndTrigger<SendTranslationJob>(hostContext.Configuration); 
                     });
                     services.AddQuartzHostedService(
                         q => q.WaitForJobsToComplete = true
