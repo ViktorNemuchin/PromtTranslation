@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Text.Json;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace PromtTranslation.Services.Implementation
 {
@@ -16,15 +17,23 @@ namespace PromtTranslation.Services.Implementation
     {
         private readonly ITranslatioonUnitOfWork _translatioonUnitOfWork;
         private readonly HttpClient _httpclient;
-        private readonly string _getLanguageUrl;
+        private readonly ILogger<TranslationService> _logger;
 
-        public TranslationService(ITranslatioonUnitOfWork translationUnitOfWork, HttpClient httpClient) =>
-            (_translatioonUnitOfWork, _httpclient, _getLanguageUrl) = (translationUnitOfWork, httpClient, "");
+
+        public TranslationService(ITranslatioonUnitOfWork translationUnitOfWork, HttpClient httpClient, ILoggerFactory logger)
+        {
+            _translatioonUnitOfWork = translationUnitOfWork;
+            _httpclient = httpClient;
+            _httpclient.BaseAddress = new Uri("http://localhost/AS//Services/v1/rest.svc/");
+            _logger = logger.CreateLogger<TranslationService>();
+
+        }
+
 
         public async Task TranslateAddedTranslationEntries() 
         {
             var statusId = await GetStatusIdByStatusName("Добавлен");
-            var completedStatusId = await GetStatusIdByStatusName("Переведен");
+            var completedStatusId = await GetStatusIdByStatusName("Обрабатывается");
             var translations = await _translatioonUnitOfWork.Translations.GetTranslationEntriesForTranslation(statusId);
             foreach (var translation in translations) 
             {
@@ -51,7 +60,7 @@ namespace PromtTranslation.Services.Implementation
         {
             foreach (var translation in translations) 
             {
-                if(!await SendTranslation(new SendTranslationDto(translation.TranslationModelId, translation.Language, translation.Text)))
+                if (!await SendTranslation(new SendTranslationDto(translation.TranslationModelId, translation.Language, translation.Text), "")) 
                 {
                     return false;
                 }
@@ -60,12 +69,13 @@ namespace PromtTranslation.Services.Implementation
         }
         private async Task<List<TranslationTextModel>>TranslateTextForAllLanguages(TranslationModel translation, string routeName) 
         {
-            var textToTranslate = translation.Translations.Where(x => x.Text.Equals(routeName)).FirstOrDefault().Text;
             var translationTextModelList = new List<TranslationTextModel>();
             foreach(var routeStep in translation.Route.LanguageRouteSteps) 
             {
-                var translationResult = await TranslateRouteStep(routeStep, textToTranslate);
-                textToTranslate = translationResult.Text;
+                var textToTranslate = translation.Translations.Where(x => x.Language.Equals(routeStep.LanguageFrom)).FirstOrDefault();
+                if(textToTranslate is null)
+                    break;
+                var translationResult = await TranslateRouteStep(routeStep, textToTranslate.Text);
                 translationTextModelList.Add(translationResult);
             }
             return translationTextModelList;
@@ -73,24 +83,28 @@ namespace PromtTranslation.Services.Implementation
 
         private async Task<TranslationTextModel> TranslateRouteStep(LanguageRouteStepsModel step, string text) 
         {
-            var translitionDto = new RouteStepDto(text, step.LanguageFrom, step.LanguageTo);
-            var translatedText = await GetTranslationFromPromt(translitionDto);
+            var translitionDto = new RouteStepDto(text, step.LanguageFrom, step.LanguageTo,"Универсальный");
+            var translatedText = await GetTranslationFromPromt(translitionDto,"TranslateText");
             return new TranslationTextModel(translatedText, step.LanguageTo);
-
         }
-        private async Task<string> GetTranslationFromPromt(RouteStepDto textToTranslate)
+        private async Task<string> GetTranslationFromPromt(RouteStepDto textToTranslate, string translateUrl)
         {
+
             var requestContent = new StringContent(JsonSerializer.Serialize<RouteStepDto>(textToTranslate));
-            var response = await _httpclient.PostAsync(_getLanguageUrl, requestContent);
+            requestContent.Headers.ContentType.MediaType = "application/json";
+
+            var response = await _httpclient.PostAsync(translateUrl, requestContent);
+            _logger.LogInformation($"Тело запроса: {response.RequestMessage}");
+            _logger.LogInformation($"Статус ответа: {response.StatusCode}, {response.ReasonPhrase}, {await response.Content.ReadAsStringAsync()}");
             if (response.IsSuccessStatusCode)
                 return await response.Content.ReadAsStringAsync();
             return null;
         }
 
-        private async Task<bool> SendTranslation(SendTranslationDto tranlatedText)
+        private async Task<bool> SendTranslation(SendTranslationDto tranlatedText,string sendTranslationUrl )
         {
             var requestContent = new StringContent(JsonSerializer.Serialize<SendTranslationDto>(tranlatedText));
-            var response = await _httpclient.PostAsync(_getLanguageUrl, requestContent);
+            var response = await _httpclient.PostAsync(sendTranslationUrl, requestContent);
             if (response.IsSuccessStatusCode)
                 return true;
             return false;
@@ -98,11 +112,13 @@ namespace PromtTranslation.Services.Implementation
 
         public async Task<ResponseTranslationEntityDto> TranslateText(RequestTranslationEntityDto requestTranslationEntity)
         {
-            var language = await GetLanguage(requestTranslationEntity.TranslationText);
+            var rawLanguage = await GetLanguage(requestTranslationEntity.TranslationText, "DetectTextLanguage");
+            if (string.IsNullOrEmpty(rawLanguage))
+                return null;
+            var language = rawLanguage.Replace("\\", "").Replace('"', ' ').Trim();
             
-            if (string.IsNullOrEmpty(language))
-                throw new ArgumentNullException("Не могу определить язык");
-            
+    
+
             var translationRoute = await GetTranslationRoute(language);
             
             var translationList = new List<TranslationTextModel>() { new TranslationTextModel(requestTranslationEntity.TranslationText, language) };
@@ -112,7 +128,7 @@ namespace PromtTranslation.Services.Implementation
             
             await _translatioonUnitOfWork.Translations.AddEntity(translationEntity);
             await _translatioonUnitOfWork.Commit();
-            return new ResponseTranslationEntityDto(translationEntity.Id, translationEntity.Status.StatusValue);
+            return new ResponseTranslationEntityDto(translationEntity.Id, translationEntity.Status.StatusValue, language);
         }
 
         private async Task<Guid> GetStatusIdByStatusName(string statusName) 
@@ -120,11 +136,13 @@ namespace PromtTranslation.Services.Implementation
             var status = await _translatioonUnitOfWork.Status.GetStatusByValue(statusName);
             return status.Id;
         }
-        private async Task<string> GetLanguage(string textToTranslate) 
+        private async Task<string> GetLanguage(string textToTranslate, string getLanguageUrl) 
         {
             var requestObject = new GetLanguageDto() { Text = textToTranslate };
+            //_httpclient.DefaultRequestHeaders.Add("Accept", "application/json");
             var requestContent = new StringContent(JsonSerializer.Serialize<GetLanguageDto>(requestObject));
-            var response = await _httpclient.PostAsync(_getLanguageUrl, requestContent);
+            requestContent.Headers.ContentType.MediaType = "application/json";
+            var response = await _httpclient.PostAsync(getLanguageUrl, requestContent);
             if (response.IsSuccessStatusCode)
                 return await response.Content.ReadAsStringAsync();
             return null;

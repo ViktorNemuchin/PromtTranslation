@@ -14,9 +14,9 @@ namespace PromtTranslation.Dtl.Context
         {
 
         }
-        
+
         public DbSet<TranslationModel> Translations;
-        
+
         public DbSet<RouteModel> Routes;
 
         public DbSet<StatusModel> Statuses;

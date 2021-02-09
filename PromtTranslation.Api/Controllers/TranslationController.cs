@@ -50,10 +50,10 @@ namespace PromtTranslation.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> TranslateText(RequestTranslationEntityDto requestTranslationEntityDto)
         {
-            //var response = await _mintosClientService.AbstractClient();
-            //if (response == null)
-            //    return NotFound("Check Db connection");
-            return Ok(await _translationService.TranslateText(requestTranslationEntityDto));
+            var result = await _translationService.TranslateText(requestTranslationEntityDto);
+            if (result is null)
+                return BadRequest("Не могу определить язык");
+            return Ok(result);
         }
     }
 }

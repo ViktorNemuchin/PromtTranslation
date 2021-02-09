@@ -15,17 +15,17 @@ namespace PromtTranslation.WorkerService
 
         private readonly ILogger<SendTranslationJob> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ITranslationService _translationService;
+        private readonly ISendTranslationService _sendTranslationService;
 
-        public SendTranslationJob(ILogger<SendTranslationJob> logger, IHttpClientFactory httpClientFactory, ITranslationService translationService)
+        public SendTranslationJob(ILogger<SendTranslationJob> logger, IHttpClientFactory httpClientFactory, ISendTranslationService sendTranslationService)
         {
             _httpClientFactory = httpClientFactory;
-            _translationService = translationService;
+            _sendTranslationService = sendTranslationService;
             _logger = logger;
         }
         public Task Execute(IJobExecutionContext context)
         {
-            Task.WaitAll(_translationService.TranslateAddedTranslationEntries());
+            Task.WaitAll(_sendTranslationService.SendTranslationEntries());
             return Task.CompletedTask;
         }
     }

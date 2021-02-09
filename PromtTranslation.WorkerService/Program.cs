@@ -31,6 +31,7 @@ namespace PromtTranslation.WorkerService
                 {
                     services.AddHttpClient();
                     services.AddScoped<ITranslationService, TranslationService>();
+                    services.AddScoped<ISendTranslationService, SendTranslationService>();
                     var conString = hostContext.Configuration.GetSection("ConnectionString").GetChildren();
                     services.AddDbContext<TranslationDbContext>(options =>
                     {

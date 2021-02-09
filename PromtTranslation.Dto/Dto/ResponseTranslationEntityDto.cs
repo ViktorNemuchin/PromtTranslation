@@ -8,9 +8,10 @@ namespace PromtTranslation.Domain.Dto
     {
         private Guid _translationId { get; set; }
         private string _status { get; set; }
+        private string _local { get; set; }
 
-        public ResponseTranslationEntityDto(Guid translationDto, string status)
-            => (_translationId, _status) = (translationDto, status);
+        public ResponseTranslationEntityDto(Guid translationDto, string status, string local)
+            => (_translationId, _status, _local) = (translationDto, status, local);
 
         public Guid TranslationId 
         {
@@ -19,6 +20,10 @@ namespace PromtTranslation.Domain.Dto
         public string Status 
         {
             get => _status;
+        }
+        public string Local
+        {
+            get => _local;
         }
 
     }

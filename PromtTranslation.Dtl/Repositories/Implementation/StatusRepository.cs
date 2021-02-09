@@ -17,6 +17,6 @@ namespace PromtTranslation.Dtl.Repositories.Implementation
             :base(translationContext) { _translationContext = translationContext; }
 
         public async Task<StatusModel> GetStatusByValue(string statusValue) =>
-            await _translationContext.Statuses.FirstOrDefaultAsync(x => x.StatusValue == statusValue);
+            await _translationContext.Set<StatusModel>().FirstOrDefaultAsync(x => x.StatusValue == statusValue);
     }
 }

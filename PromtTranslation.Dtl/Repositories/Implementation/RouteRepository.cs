@@ -17,7 +17,7 @@ namespace PromtTranslation.Dtl.Repositories.Implementation
             : base(translationContext) { _translationContext = translationContext; }
 
         public async Task<RouteModel> GetRouteByName(string routeValue) =>
-           await _translationContext.Routes
-            .FirstOrDefaultAsync(x => x.RouteName == routeValue);
+           await _translationContext.Set<RouteModel>().Where(x=>string.Compare(routeValue,x.RouteName) == 0)
+            .FirstOrDefaultAsync();
     }
 }

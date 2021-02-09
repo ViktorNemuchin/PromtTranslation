@@ -19,10 +19,10 @@ namespace PromtTranslation.Dtl.Repositories.Implementation
 
         public async Task<TranslationTextModel> GetTranslationByText(string text, string locale) 
         {
-            return await _translationContext.TransaltionTexts.FirstOrDefaultAsync(x => x.Text == text || x.Language == locale);
+            return await _translationContext.Set<TranslationTextModel>().FirstOrDefaultAsync(x => x.Text == text || x.Language == locale);
         }
         public async Task<IEnumerable<TranslationModel>> GetTranslationEntriesForTranslation(Guid statusId) 
-            => await _translationContext.Translations.Include(x => x.Route).ThenInclude(x => x.LanguageRouteSteps).Include(x => x.Translations).Where(y => y.StatusId == statusId).ToListAsync();
+            => await _translationContext.Set<TranslationModel>().Include(x => x.Route).ThenInclude(x => x.LanguageRouteSteps).Include(x => x.Translations).Where(y => y.StatusId == statusId).ToListAsync();
 
         
     }
