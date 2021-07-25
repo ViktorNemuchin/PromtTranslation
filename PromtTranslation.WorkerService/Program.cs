@@ -13,8 +13,11 @@ using PromtTranslation.Dtl.UnitOfWowrk.Implementation;
 using PromtTranslation.Dtl.Context;
 using PromtTranslation.Services.Implementation;
 using PromtTranslation.Services.Interface;
+using PromtTranslation.Services.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using PromtTranslation.Domain.Dto;
+using Microsoft.Extensions.Logging;
 
 namespace PromtTranslation.WorkerService
 {
@@ -29,14 +32,21 @@ namespace PromtTranslation.WorkerService
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
+                    var customConfiguration = hostContext.Configuration.Get<DbConfigurationDto>();
                     services.AddHttpClient();
-                    services.AddScoped<ITranslationService, TranslationService>();
-                    services.AddScoped<ISendTranslationService, SendTranslationService>();
-                    var conString = hostContext.Configuration.GetSection("ConnectionString").GetChildren();
+                    services.AddScoped<ITranslationService, TranslationService>(x => new TranslationService(
+                        x.GetRequiredService<ITranslatioonUnitOfWork>(),
+                        x.GetRequiredService<HttpClient>(),
+                        x.GetRequiredService<ILoggerFactory>(),
+                        customConfiguration.PromtUrl));
+                    services.AddScoped<ISendTranslationService, SendTranslationService>(
+                        x => new SendTranslationService(x.GetRequiredService<ITranslatioonUnitOfWork>(), 
+                        x.GetRequiredService<HttpClient>(), customConfiguration.BankOfIdeasUrl));
                     services.AddDbContext<TranslationDbContext>(options =>
                     {
-                        options.UseNpgsql(hostContext.Configuration.GetConnectionString("PromtDb"),
-                            npsqlOptions => npsqlOptions.MigrationsAssembly("PromtTranslation.Api"));
+                        OptionsHelper.SetConnectionString(customConfiguration.DbType, 
+                            options, 
+                            hostContext.Configuration);
                         options.EnableSensitiveDataLogging();
                     });
                     services.AddScoped<TranslationDbContext>();

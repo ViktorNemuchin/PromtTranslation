@@ -15,10 +15,13 @@ using PromtTranslation.Services.Implementation;
 using PromtTranslation.Dtl.Context;
 using PromtTranslation.Dtl.UnitOfWowrk.Implementation;
 using PromtTranslation.Dtl.UnitOfWowrk.Interface;
+using PromtTranslation.Services.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.IO;
+using PromtTranslation.Domain.Dto;
+using System.Net.Http;
 
 namespace PromtTranslation.Api
 {
@@ -34,13 +37,18 @@ namespace PromtTranslation.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var customConfiguration = Configuration.Get<DbConfigurationDto>();
             services.AddControllers();
-            services.AddHttpClient<ITranslationService,TranslationService>();
+            services.AddHttpClient();
+            services.AddScoped<ITranslationService,TranslationService>(
+                x => new TranslationService(x.GetRequiredService<ITranslatioonUnitOfWork>(),
+                x.GetRequiredService<HttpClient>(),
+                x.GetRequiredService<ILoggerFactory>(),
+                customConfiguration.PromtUrl));
             services.AddScoped<ITranslatioonUnitOfWork, TranslationUnitOfWork>();
             services.AddDbContext<TranslationDbContext>(options =>
             {
-                options.UseNpgsql(Configuration.GetConnectionString("PromtDb"),
-                    npsqlOptions => npsqlOptions.MigrationsAssembly("PromtTranslation.Api"));
+                OptionsHelper.SetConnectionString(customConfiguration.DbType, options, Configuration);
                 options.EnableSensitiveDataLogging();
             });
             services.AddSwaggerGen(c =>

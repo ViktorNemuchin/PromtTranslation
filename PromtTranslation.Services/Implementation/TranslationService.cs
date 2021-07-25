@@ -20,11 +20,12 @@ namespace PromtTranslation.Services.Implementation
         private readonly ILogger<TranslationService> _logger;
 
 
-        public TranslationService(ITranslatioonUnitOfWork translationUnitOfWork, HttpClient httpClient, ILoggerFactory logger)
+        public TranslationService(ITranslatioonUnitOfWork translationUnitOfWork, HttpClient httpClient, ILoggerFactory logger, string url)
         {
             _translatioonUnitOfWork = translationUnitOfWork;
             _httpclient = httpClient;
-            _httpclient.BaseAddress = new Uri("http://localhost/AS//Services/v1/rest.svc/");
+            //_httpclient.BaseAddress = new Uri("http://localhost/AS//Services/v1/rest.svc/");
+            _httpclient.BaseAddress = new Uri(url);
             _logger = logger.CreateLogger<TranslationService>();
 
         }
@@ -74,7 +75,7 @@ namespace PromtTranslation.Services.Implementation
             {
                 var textToTranslate = translation.Translations.Where(x => x.Language.Equals(routeStep.LanguageFrom)).FirstOrDefault();
                 if(textToTranslate is null)
-                    break;
+                    continue;
                 var translationResult = await TranslateRouteStep(routeStep, textToTranslate.Text);
                 translationTextModelList.Add(translationResult);
             }
@@ -87,6 +88,7 @@ namespace PromtTranslation.Services.Implementation
             var translatedText = await GetTranslationFromPromt(translitionDto,"TranslateText");
             return new TranslationTextModel(translatedText, step.LanguageTo);
         }
+
         private async Task<string> GetTranslationFromPromt(RouteStepDto textToTranslate, string translateUrl)
         {
 

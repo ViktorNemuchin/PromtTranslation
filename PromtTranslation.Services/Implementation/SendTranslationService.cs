@@ -17,11 +17,12 @@ namespace PromtTranslation.Services.Implementation
         private readonly HttpClient _httpclient;
 
 
-        public SendTranslationService(ITranslatioonUnitOfWork translationUnitOfWork, HttpClient httpClient)
+        public SendTranslationService(ITranslatioonUnitOfWork translationUnitOfWork, HttpClient httpClient, string bankOfIdeasUrl = "")
         {
             _translatioonUnitOfWork = translationUnitOfWork;
             _httpclient = httpClient;
-            _httpclient.BaseAddress = new Uri("http://localhost:56875/Health/Translation/Post");
+            //_httpclient.BaseAddress = new Uri("http://localhost:56875/Health/Translation/Post");
+            _httpclient.BaseAddress = new Uri(bankOfIdeasUrl);
 
         }
         public async Task SendTranslationEntries()
